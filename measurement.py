@@ -4,7 +4,7 @@ from qcodes import Parameter, ParamSpec
 from qcodes.utils.validators import Numbers
 from qcodes.instrument.base import Instrument
 from qcodes.dataset.data_set import DataSet
-from qcodes.instrument_drivers.tektronix.Keithley_6517A import Keithley_6517A
+# qcodes.instrument_drivers.tektronix.Keithley_6517A import Keithley_6517A
 from .configuration.config import ConfigInstrument
 
 import os

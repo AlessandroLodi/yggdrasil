@@ -9,19 +9,72 @@ from functools import partial
 import numpy as np
 from datetime import datetime
 
+# class MockVisaInstrument(VisaInstrument):
+#     def __init__(self, name, address, visa_handle=None, **kwargs):
+#         if visa_handle is not None:
+#             self._mock_attributes = {
+#                 'visa_handle': visa_handle,
+#                 'name': name,
+#                 'address': address,
+#                 'parameters': {},
+#                 'functions': {}
+#             }
+#             self.add_parameter = self._mock_add_parameter
+#             self.add_function = self._mock_add_function
+#         else:
+#             super().__init__(name, address, terminator='\n', **kwargs)
+
+#     def _mock_add_parameter(self, name, **kwargs):
+#         # Create a mock parameter that stores its value
+#         class MockParameter:
+#             def __init__(self, name, **kwargs):
+#                 self.name = name
+#                 self.value = None
+#                 self.get_cmd = kwargs.get('get_cmd')
+#                 self.set_cmd = kwargs.get('set_cmd')
+#                 self.val_mapping = kwargs.get('val_mapping', {})
+
+#             def __call__(self, value=None):
+#                 if value is not None:
+#                     self.value = value
+#                 return self.value
+            
+#             def cache(self):
+#                 return self.value
+
+#         self._mock_attributes['parameters'][name] = MockParameter(name, **kwargs)
+
+#     def _mock_add_function(self, name, **kwargs):
+#         self._mock_attributes['functions'][name] = lambda: None
+
+#     def __getattr__(self, name):
+#         if name == '_mock_attributes':
+#             raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '_mock_attributes'")
+#         if hasattr(self, '_mock_attributes'):
+#             if name in self._mock_attributes:
+#                 return self._mock_attributes[name]
+#             if name == 'parameters':
+#                 return self._mock_attributes['parameters']
+#             if name in self._mock_attributes['parameters']:
+#                 return self._mock_attributes['parameters'][name]
+#         return super().__getattribute__(name)
+
 
 class Keithley_6517A(VisaInstrument):
     """
     The QCoDeS driver for Keithley_6517A high resistance electrometer.
     """
-    def __init__(self, name, address, **kwargs):
+    
+    
+    def __init__(self, name, address, visa_handle=None, **kwargs):
         """
         Args:
-            name (str): The name used internally by qcodes in the datset.
+            name (str): The name used internally by qcodes in the dataset.
             address (str): The VISA device address.
-        
+            visa_handle: Optional handle to a VISA instrument (used for testing).
         """
-        super().__init__(name, address, terminator='\n', **kwargs)
+        super().__init__(name, address, visa_handle=visa_handle, **kwargs)
+            
         
         # Create a map for all the front panel keys in Keithley 6517A.
         # In case a fucntion of keithely 6517A is not defined in this driver.
@@ -160,7 +213,7 @@ class Keithley_6517A(VisaInstrument):
                            get_cmd=':SENSe:FUNCtion?',
                            val_mapping={k: v[0] 
                                         for k, v in self.sense_function_map.items()})
-        
+                
         # The sense function (both readable name and raw name) will be
         # frequently used below.
         # MUST be after the definition of 'sense_function' parameter
@@ -547,9 +600,18 @@ class Keithley_6517A(VisaInstrument):
     
     def _get_sense_function(self):
         """
-        .cache() is recommended over the use of get_latest().
+        Get the current sense function, with a fallback to a default value.
         """
-        _sense_function = self.sense_function.cache() or self.sense_function()
+        try:
+            _sense_function = self.sense_function.cache() or self.sense_function()
+        except AttributeError:
+            # If sense_function is not initialized yet or doesn't have cache, return a default value
+            _sense_function = None
+
+        if _sense_function is None:
+            # Provide a default value if sense_function is not set
+            _sense_function = list(self.sense_function_map.keys())[0]  # Use the first key as default
+
         return _sense_function
     
     def _timestamp(self):
