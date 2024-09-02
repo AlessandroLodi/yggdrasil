@@ -7,7 +7,9 @@ import numpy as np
 
 from qcodes.instrument import VisaInstrument, VisaInstrumentKWArgs
 from qcodes.instrument.parameter import Parameter, MultiParameter
-from qcodes.math_utils import FieldVector
+from qcodes import VisaInstrument, Parameter, MultiParameter
+from qcodes.utils.validators import Enum, Numbers, Bool
+from qcodes.utils.helpers import create_on_off_val_mapping
 from qcodes.parameters import (
     Parameter,
     create_on_off_val_mapping,
@@ -622,9 +624,6 @@ class Keithley2400(VisaInstrument):
         self.write(f":FORMat:ELEMents {element_str}")
         self.write(":TRIGger:COUNt {size}")  # Set trigger count to match buffer size
 
-from qcodes import VisaInstrument, Parameter, MultiParameter
-from qcodes.utils.validators import Enum, Numbers, Bool
-from qcodes.utils.helpers import create_on_off_val_mapping
 
 class Keithley2400Enhanced(Keithley2400):
     """
