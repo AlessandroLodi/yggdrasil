@@ -6,7 +6,7 @@ from measurement import StaircaseSweep
 
 # Initialize the instruments
 k6517a = Keithley_6517A('k6517a', 'GPIB0::27::INSTR')
-k2400 = Keithley2400('k2400', 'GPIB0::24::INSTR')
+k2400 = Keithley2400('k2400', 'GPIB0::24::INSTR')s
 
 # Create a QCoDeS station and add the instruments
 station = Station()

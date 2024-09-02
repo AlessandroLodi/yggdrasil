@@ -610,19 +610,20 @@ class Keithley2400(VisaInstrument):
         self.buffer_size(size)
         if elements is None:
             elements = ["voltage", "current"]
+
         # Ensure valid elements
         valid_elements = ['voltage', 'current', 'resistance', 'time']
         if not set(elements).issubset(valid_elements):
             raise ValueError(f"Invalid buffer elements. Choose from: {valid_elements}")
 
-        # Construct the element string for the command
+        # Construct the element string for the command - **FIX HERE**
         element_str = ",".join(
-            [f'"{element.upper()}"' for element in elements]
+            [f'"\'{element.upper()}\'"' for element in elements]  # Single quotes inside double quotes
         )
 
         self.write(f":TRACe:FEED:CONTrol NEXT")
         self.write(f":FORMat:ELEMents {element_str}")
-        self.write(":TRIGger:COUNt {size}")  # Set trigger count to match buffer size
+        self.write(f":TRIGger:COUNt {size}")  # Set trigger count to match buffer size
 
 
 class Keithley2400Enhanced(Keithley2400):
